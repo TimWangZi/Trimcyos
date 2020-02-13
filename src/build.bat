@@ -1,6 +1,6 @@
 del a.bin
-nasm bootcode.inc -o boot.inf
-nasm kernel_init.asm -o ki.bin
-t_copy f a.bin boot.inf ki.bin
-del ki.bin
-del boot.inf
+nasm asm\bootcode.inc -o asm\boot.inf
+nasm asm\kernel_init.asm -o asm\ki.bin
+tool\t_copy f a.bin asm\boot.inf asm\ki.bin
+del asm\ki.bin
+del asm\boot.inf
