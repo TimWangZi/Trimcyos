@@ -6,10 +6,11 @@
 ;Address:
 ;0x7E00~0x15400 系统内核加载地址
 ;========================
-cylinder equ 3
+cylinder equ 2
 head equ 1
 sector equ 18
 org 0x7c00					  ;程序开始部分
+mov sp,0x7c00
 mov ax,0
 mov bx,ax
 mov cx,bx
@@ -30,10 +31,10 @@ read_floopy:
 	mov cx,0002h
 	mov dx,0000h
 	jmp retry
-	loop_1:
-		loop_2:
-			loop_3:
-				retry:
+	loop_1:							;for(l=0;l<3+1;l++)
+		loop_2:						;for(h=0;h<1+1;h++)
+			loop_3:					;for(s=1;s<18+1;s++)
+				retry:				;读取错误重试
 					mov al,01h
 					mov ah,02h
 					int 13h
@@ -74,6 +75,7 @@ end_mbr:
 	mov bx,ax
 	mov cx,bx
 	mov dx,cx
+	jmp 7e00h
 msg:db"Can't read disk"
 msgLen equ $-msg
 times 510 - ($ - $$) db 0     ;填充剩余部分
