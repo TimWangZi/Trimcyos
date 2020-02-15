@@ -4,9 +4,9 @@
 ;running in MBR
 ;2020/2/14/8:39
 ;Address:
-;0x7E00~0x15400 系统内核加载地址
+;0x7E00~0x34c00 系统内核加载地址
 ;========================
-cylinder equ 2
+cylinder equ 9
 head equ 1
 sector equ 18
 org 0x7c00					  ;程序开始部分
@@ -40,7 +40,10 @@ read_floopy:
 					int 13h
 					cmp ah,00h
 					jne retry
-				add bx,0x200
+				mov bx,es
+				add bx,0x20
+				mov es,bx
+				mov bx,0
 				add cl,1
 				cmp cl,sector+1
 				jl loop_3

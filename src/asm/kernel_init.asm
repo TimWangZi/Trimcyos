@@ -5,7 +5,7 @@
 ;========================
 ;================
 ;The Data area
-;from 0x15400~0xa0000
+;from 0x34c00~0xa0000
 ;offset
 ;0~100h 	VBE Info
 ;100~114h 	VBE CRTC Information Block
@@ -14,12 +14,11 @@
 ;120h		The GDT
 ;================
 org 0x7e00
-DATA_AREA    equ 0x1540
 SVGA_640_480 equ 111h
 VGA_640_480  equ 13h
 kernel_init:
 	check_video_mode_64k:
-		mov bx,1540h
+		mov bx,34c0h
 		mov es,bx
 		mov di,0000h
 		mov ax,4f01h
@@ -39,8 +38,6 @@ kernel_init:
 		mov bx,SVGA_640_480
 		mov di,100h							;SVGA信息块地址
 		int 10h								;启用SVGA模式
-		mov bx,1540h
-		mov es,bx
 		mov bx,115h
 		mov BYTE[es:bx+09h],0xff			;SVGA模式	
 		jmp end_check
@@ -65,16 +62,16 @@ kernel_init:
 		mov es,bx
 		mov di,ax
 		
-		mov bx,1552
+		mov bx,34c0h
 		mov ds,bx
 		mov bx,0000h
 ;================================
 ;GDT table
 ;name		type	address			privilege
-;sys_code	code	0x7c00~0x15400		ring0
-;sys_data	data	0x15400~0xfffff		ring0
+;sys_code	code	0x7c00~0x34c00		ring0
+;sys_data	data	0x34c00~0xfffff		ring0
 ;sys_stuck	data	0x100000~0x1f0000	ring0
-;usr_data	data	0x1f0000~
+;usr_data	data	0x1f0000~0x
 ;================================
 		
 		
