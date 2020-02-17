@@ -5,13 +5,12 @@
 ;========================
 ;================
 ;The Data area
-;from 0x34c00~0xa0000
+;from 0x34c00~0x134bff
 ;offset
-;0~100h 	VBE Info
-;100~114h 	VBE CRTC Information Block
+;0~100h 	VBE CRTC Information Block
 ;115h~11eh  The video mode without VBE
 ;11fh		Video mode(FFh is vbe,00h is vga)
-;120h		The GDT table
+;120h		The temporary GDT table
 ;================
 org 0x7e00
 SVGA_640_480 equ 111h
@@ -24,7 +23,6 @@ kernel_init:
 		mov ax,4f01h
 		mov cx,SVGA_640_480
 		int 10h								;获得VBE版本信息
-		call clear_mem
 		
 		cmp ax,004fh						;检查版本
 		jne unspport
@@ -37,8 +35,9 @@ kernel_init:
 		
 		mov ax,4f02h
 		mov bx,SVGA_640_480
-		mov di,100h							;SVGA信息块地址
-		int 10h								;启用SVGA模式
+		mov di,000h							;SVGA信息块地址
+		int 10h								;启用SVGA模式（覆盖原版本信息）
+		call clear_mem						;清空信息块后256字节
 		mov bx,115h
 		mov BYTE[es:bx+09h],0xff			;SVGA模式	
 		jmp end_check
@@ -62,18 +61,23 @@ kernel_init:
 		mov dx,cx
 		mov es,bx
 		mov di,ax
+		call write_temporary_gdt
+		jmp _32bit_protect_mode
 ;================================
-;GDT table
+;Main GDT table
 ;name		type	address			privilege
+;sys_stack	data	0x0x7c00~0x5ff		ring0
 ;sys_code	code	0x7c00~0x34c00		ring0
-;sys_data	data	0x34c00~0xfffff		ring0
-;sys_stack	data	0x100000~0x1f0000	ring0
-;usr_data	data	0x1f0000~0x41f0000	ring3
-;usr_code	code	0x41f0000~0x51f0000	ring3
-;usr_stack	data	0x51f0000~0x81f0000	ring3
-;video_buf	data	0x????~0x????(600k)	ring0
+;sys_data	data	0x34c00~0xffffffff	ring0
+;usr_data	data	0x1f0000~0x41f0000	ring3-|
+;usr_code	code	0x41f0000~0x51f0000	ring3 |-data
+;usr_stack	data	0x51f0000~0x81f0000	ring3 |
+;video_buf	data	0x????~0x????(600k)	ring0-|
 ;================================
-	write_gdt:
+;先加载临时描述符
+;然后将用户代码拷贝到目标地址
+;最后加载主GDT描述符
+	write_temporary_gdt:	;临时GDT分区表
 		push ds
 		mov bx,34d2h
 		mov ds,bx
@@ -82,54 +86,34 @@ kernel_init:
 		;空
 		mov dword[bx+00h],0x00
 		mov dword[bx+04h],0x00
-		;#1系统代码段描述符(sys_code)
-		;	基址：0x7c00
-		;	段限长：0x2D000
-		;	单位：byte
-		;	32bit
-		;	属性：可执行
-		;	在内存中存在
-		;	ring 0
-		mov dword[bx+08h],0x7c00_D000
-		mov dword[bx+0ch],0x0042_9a00
-		;#2系统数据段描述符(sys_data)
-		;	基址：0x34c00
-		;	段限长：0xcb3ff
-		;	单位：byte
-		;	32bit
+		;#1系统堆栈描述符(sys_stack)
+		;	基址：0x0600
+		;	段限长：0x7600
 		;	属性：可读可写
-		;	在内存中存在
-		;	ring 0
-		mov dword[bx+10h],0x4c00_b3ff
-		mov dword[bx+14h],0x004c_9234
-		;#3系统堆栈段描述符(sys_stack)
-		;	基址：0x1f0000
-		;	段限长：0xf0000
-		;	单位：4kb
 		;	32bit
-		;	属性：可读可写向下拓展
-		;	在内存中存在
-		;	ring 0
-		mov dword[bx+18h],0x0000_00f0
-		mov dword[bx+1ch],0x00c0_961f
-		;#4用户数据段描述符(usr_data)
-		;	基址：0x1f0000
-		;	段限长：0x10000
-		;	单位：4kb
+		;	单位：byte
+		mov dword[bx+08h],0x0600_7600
+		mov dword[bx+0ch],0x0040_9200
+		;#2系统代码描述符(sys_code)
+		;	基址：0x7c00
+		;	段限长：0x2c
+		;	属性：可读可执行
 		;	32bit
-		;	属性：可读可写向下拓展
-		;	在内存中存在
-		;	ring 3
-		mov dword[bx+20h],0x0000_0000
-		mov dword[bx+24h],0x00c1_f21f
-		;#4用户数据段描述符(usr_data)
-		;	基址：0x1f0000
-		;	段限长：0x10000
 		;	单位：4kb
+		mov dword[bx+10h],0x7c00_002c
+		mov dword[bx+14h],0x00c0_9a00
+		;#3系统数据描述符(sys_data)
+		;	基址：0x34c00
+		;	段限长：0xfffff
+		;	属性：可读可写
 		;	32bit
-		;	属性：可读可写向下拓展
-		;	在内存中存在
-		;	ring 3
+		;	单位：4kb
+		mov dword[bx+18h],0x4c00_ffff
+		mov dword[bx+1ch],0x00cf_9203
+		pop ds
+		mov word[_length],20h
+		mov dword[_base],0x0003_4d20
+		ret
 	clear_mem:
 		push ax
 		push bx
@@ -152,3 +136,33 @@ kernel_init:
 		pop bx
 		pop ax
 		ret
+	_32bit_protect_mode:
+		lgdt [GDTR0_DATA]
+		
+		in al,0x92              ;南桥芯片内的端口
+		or al,0000_0010B
+		out 0x92,al             ;打开A20:第21根地址线
+		
+		cli 					;关中断
+		
+		mov eax,cr0
+		or eax,1
+		mov cr0,eax             ;设置PE位，置为1，进入保护模式
+		
+		jmp 0x0010:(flush-0x7c00)
+		[bits 32]
+		flush:
+			mov ax,0x0008
+			mov ss,ax
+			mov ax,0x0018
+			mov ds,ax
+			xor eax,eax
+			mov esp,75ffh
+			mov ebp,esp
+			push ax
+			pop ax
+			hlt
+			
+GDTR0_DATA:
+_length:DW 0x0000 
+_base:DD 0x0000_00000
