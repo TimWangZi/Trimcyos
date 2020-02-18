@@ -21,6 +21,7 @@
 [bits 32]
 global memory_write
 global memory_read
+global read_cs
 global io_write_8
 global io_read_8
 global io_write_16
@@ -42,7 +43,7 @@ memory_write:
 ;函数memory_read
 ;	#1目标地址(32bit)
 ;	返回值：目标地址指向的数据(16bit)
-;	作用：向目标地址写入2个字节的数据
+;	作用：从目标地址读入2个字节的数据
 memory_read:
 	add esp,4
 	pop ebx
@@ -50,6 +51,18 @@ memory_read:
 	mov ax,[ds:ebx]
 	sub esp,8
 	ret
+;函数read_cs
+;	#1目标地址(32bit)
+;	返回值：目标地址指向的数据(16bit)
+;	作用：读取目标地址2个字节的数据（代码段）
+read_cs:
+	add esp,4
+	pop ebx
+	xor eax,eax
+	mov ax,[cs:ebx]
+	sub esp,8
+	ret
+
 ;函数io_write_8
 ;	#1目标io地址(16bit)
 ;	#2写入目标的数据(8bit)
