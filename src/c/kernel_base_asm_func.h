@@ -4,17 +4,20 @@
 *File:kernel_base_asm_func.h
 *This file are statement
 *The function of assembly
-*2020/2/11/21:45
+*2020/2/18/14:25
 *=========================
 */
-extern void _memory_write(unsigned long address,unsigned short int data16bit);						   //å‘ç›®æ ‡å†™å…¥ä¸¤ä¸ªå­—èŠ‚
-extern unsigned long _memory_read(unsigned long address);					  						   //ä»ç›®æ ‡è¯»å–ä¸¤ä¸ªå­—èŠ‚
+typedef  unsigned char      uchar;//8bit
+typedef	 unsigned short int word; //16bit
+typedef  unsigned long      dword;//32bit
 
-extern void _cpu_hlt(void);																			   //CPUä¼‘çœ å‡½æ•°
-extern void _select_ds(unsigned long selecter);														   //ä¿®æ”¹dsæ®µé€‰æ‹©å­
-extern void _select_ss(unsigned long selecter);														   //ä¿®æ”¹ssæ®µé€‰æ‹©å­
+extern void memory_write(dword _address, word _data);	//Ğ´ÄÚ´æ
+extern word memory_read(dword _address);				//¶ÁÄÚ´æ
+extern word read_cs(dword _address);					//¶Á´úÂë¶Î
 
-extern void _system_output_8(unsigned short int address, unsigned short int data8bit);				   //ç«¯å£è¾“å‡ºå‡½æ•°
-extern unsigned long _system_input_8(unsigned short int address);									   //ç«¯å£è¯»å…¥å‡½æ•°
-extern void _system_output_16(unsigned short int address, unsigned short int data16bit);			   //ç«¯å£è¾“å‡º(16bit)å‡½æ•°
-extern unsigned long _system_input_8(unsigned short int address);									   //ç«¯å£è¾“å…¥(16bit)å‡½æ•°
+extern void  io_write_8(word _address, uchar _data);	//Ğ´¶Ë¿Ú(1×Ö½Ú)
+extern uchar io_read_8(word _address);					//¶Á¶Ë¿Ú(1×Ö½Ú)
+extern void  io_write_16(word _address, word _data);	//Ğ´¶Ë¿Ú(2×Ö½Ú)
+extern word  io_read_16(word _address);					//¶Á¶Ë¿Ú(2×Ö½Ú)
+
+extern void  system_hlt(void);							//CPUÍ£»ú£¬Ö±µ½ÖĞ¶Ï
