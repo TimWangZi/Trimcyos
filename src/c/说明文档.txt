@@ -1,0 +1,29 @@
+#Trimcyos
+Tim Wang 2020/2/22
+1.System memory map
+	0.preview
+	1.kernel mode map
+	2.user mode map
+
+-------#1 System memory map-------
+#0.preview
+================LOW
+INTERPUT TABLE
+================0x600
+KERNEL STACK
+================0x7c00
+CODE AND DATA
+(FROM FLOOPY DISK)
+================0x34c00
+The Data area
+from 0x34c00~0x134bff
+offset
+0~100h  	VBE CRTC Information Block
+115h~11eh   The video mode without VBE
+11fh		Video mode(FFh is vbe,00h is vga)
+120h		The temporary GDT table
+500h~1000h	DATA_BSS
+1000h+		DATA
+================
+USER_AREA
+================

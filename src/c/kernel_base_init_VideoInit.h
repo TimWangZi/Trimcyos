@@ -7,28 +7,31 @@
 #define NONE				  0x0000
 struct Video_option{
 	uchar     mode;
-	word_ptr  liner_video_buffer;
-	uchar_ptr bank_video_buffer;
+	dword_ptr liner_video_buffer;
+	dword_ptr bank_video_buffer;
 	word	  wide;
 	word      hight;
 	uchar	  bits_per_pixel;
 }video_option;
-void sys_init_video() {
+void sys_init_video() {										//视频初始化
 	uchar_ptr tag = (uchar_ptr)(TAG_ADDR_VIDEO_TAG);		//0xFF是VBE 0x00是VGA 其他是出错
 	if ((*tag) == VIDEO_MODE_VBE) {							//VBE
 		video_option.mode = VIDEO_MODE_VBE;
+		
 		video_option.bank_video_buffer = NONE;
 		dword_ptr liner_vb = (dword_ptr)(RAM_ADDR_VIDEO_BUF);
-		video_option.liner_video_buffer = *liner_vb;
+		video_option.liner_video_buffer = (dword_ptr)(*liner_vb);
+		
 		dword_ptr scr_size = (dword_ptr)(SCREEN_WIDE_ADDR);
 		video_option.wide = *scr_size;
 		scr_size = (dword_ptr)(SCREEN_HIGH_ADDR);
 		video_option.hight = *scr_size;
+		
 		video_option.bits_per_pixel = 16;
 		return;
 	}else if ((*tag) == VIDEO_MODE_VGA) {
 		video_option.mode = VIDEO_MODE_VGA;
-		video_option.bank_video_buffer = 0xa0000;
+		video_option.bank_video_buffer = (dword_ptr)(0xa0000);
 		video_option.wide = 640;
 		video_option.hight = 480;
 		video_option.bits_per_pixel = 8;
