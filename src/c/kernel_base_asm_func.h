@@ -11,6 +11,11 @@ typedef  unsigned char      uchar;//8bit
 typedef	 unsigned short int word; //16bit
 typedef  unsigned long      dword;//32bit
 
+typedef  uchar*      uchar_ptr;//8bit指针
+typedef	 word*		 word_ptr; //16bit指针
+typedef  dword*      dword_ptr;//32bit指针
+
+
 extern void memory_write(dword _address, word _data);	//写内存
 extern word memory_read(dword _address);				//读内存
 extern word read_cs(dword _address);					//读代码段

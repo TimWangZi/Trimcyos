@@ -1,4 +1,5 @@
 #include "kernel_base_asm_func.h"
-void _start(void){
-	system_hlt();
+#include "kernel_base_init_VideoInit.h"
+void _start(void) {
+	
 }
