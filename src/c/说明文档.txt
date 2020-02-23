@@ -22,7 +22,7 @@ offset
 115h~11eh   The video mode without VBE
 11fh		Video mode(FFh is vbe,00h is vga)
 120h		The temporary GDT table
-500h~1000h	DATA_BSS
+500h~1000h	NONE
 1000h+		DATA
 ================
 USER_AREA

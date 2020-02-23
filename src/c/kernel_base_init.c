@@ -1,6 +1,7 @@
 #include "kernel_base_asm_func.h"
-#include "kernel_base_init_VideoInit.h"
+void sys_init_video();
 void _start(void) {
-	sys_init_video();					//³õÊ¼»¯ÏµÍ³ÊÓÆµ
+	sys_init_video();					//è§†é¢‘åˆå§‹åŒ–
 	system_hlt();
 }
+#include "kernel_base_init_VideoInit.h"

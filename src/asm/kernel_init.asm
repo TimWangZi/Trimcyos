@@ -48,7 +48,7 @@ kernel_init:
 		int 10h								;启用SVGA模式（覆盖原版本信息）,+0x4000表示启用高地址线性缓冲区
 		call clear_mem						;清空信息块后1024字节
 		mov bx,11fh
-		mov BYTE[es:bx+09h],0xff			;SVGA模式	
+		mov BYTE[es:bx],0xff				;SVGA模式	
 		jmp end_check
 		unspport:
 			mov bx,34c0h

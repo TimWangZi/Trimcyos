@@ -29,7 +29,7 @@ void sys_init_video() {										// ”∆µ≥ı ºªØ
 		
 		video_option.bits_per_pixel = 16;
 		return;
-	}else if ((*tag) == VIDEO_MODE_VGA) {
+	}else if ((*tag) == VIDEO_MODE_VGA) {					//VGA
 		video_option.mode = VIDEO_MODE_VGA;
 		video_option.bank_video_buffer = (dword_ptr)(0xa0000);
 		video_option.wide = 640;
