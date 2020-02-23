@@ -11,6 +11,7 @@
 ;115h~11eh  The video mode without VBE
 ;11fh		Video mode(FFh is vbe,00h is vga)
 ;120h		The temporary GDT table
+;500h+		Mainsys
 ;================
 org 0x7e00
 SVGA_640_480 equ 111h
@@ -20,11 +21,19 @@ kernel_init:
 		mov bx,34c0h
 		mov es,bx
 		mov di,0000h
-		mov ax,4f01h
-		mov cx,SVGA_640_480
+		mov ax,4f00h
 		int 10h								;获得VBE版本信息
 		
-		cmp ax,004fh						;检查版本
+		cmp ax,004fh
+		jne unspport
+		cmp word[es:di+4],0x0200			;检查版本
+		jb unspport
+		
+		mov ax,4f01h
+		mov cx,SVGA_640_480
+		int 10h								
+		
+		cmp ax,004fh						
 		jne unspport
 		cmp BYTE[es:di+19h],16
 		jne unspport
@@ -34,12 +43,12 @@ kernel_init:
 		jz unspport
 		
 		mov ax,4f02h
-		mov bx,SVGA_640_480
+		mov bx,SVGA_640_480 + 0x4000
 		mov di,000h							;SVGA信息块地址
-		int 10h								;启用SVGA模式（覆盖原版本信息）
-		call clear_mem						;清空信息块后256字节
-		mov bx,115h
-		mov BYTE[es:bx+09h],0xff			;SVGA模式	
+		int 10h								;启用SVGA模式（覆盖原版本信息）,+0x4000表示启用高地址线性缓冲区
+		call clear_mem						;清空信息块后1024字节
+		mov bx,11fh
+		mov BYTE[es:bx],0xff				;SVGA模式	
 		jmp end_check
 		unspport:
 			mov bx,34c0h
@@ -53,7 +62,7 @@ kernel_init:
 			mov WORD[es:bx+02h],480			;屏高
 			mov DWORD[es:bx+04h],0xa0000	;缓冲区地址
 			mov BYTE[es:bx+08h],8			;色深
-			mov BYTE[es:bx+09h],00h			;VGA模式
+			mov BYTE[es:bx+0ah],00h			;VGA模式
 	end_check:
 		xor ax,ax
 		mov bx,ax
@@ -127,7 +136,7 @@ kernel_init:
 		_loop:
 			mov DWORD[es:bx],0000_0000h
 			add bx,4
-			cmp bx,256
+			cmp bx,1024
 			jle _loop
 		pop di
 		pop es
@@ -146,6 +155,7 @@ kernel_init:
 		cli 					;关中断
 		
 		mov eax,cr0
+		and eax,0x7fffffff		;禁用分页
 		or eax,1
 		mov cr0,eax             ;设置PE位，置为1，进入保护模式
 		
@@ -159,10 +169,13 @@ kernel_init:
 			xor eax,eax
 			mov esp,75ffh
 			mov ebp,esp
-			push ax
-			pop ax
-			hlt
+			
+			xor eax,eax
+			mov ebx,0xffff
+			;STI					;允许中断发生....个屁！
+			jmp 0x0010:0x0000_0400
 			
 GDTR0_DATA:
 _length:DW 0x0000 
 _base:DD 0x0000_00000
+times 512 - ($ - $$) db 0

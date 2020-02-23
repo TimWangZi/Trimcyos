@@ -1,0 +1,8 @@
+Tim Wang 2020/2/22{
+	C->OBJ:
+		clang --target=i686-pc-none-elf -march=i686 -c kernel_base_init.c -o main.o -ffreestanding
+	[OBJ+OBJ]->OBJ:
+		[./]$HOME/opt/cross/bin/i686-elf-ld main.o cfunc.o -o c.o -Ttext 0x00000400 -Tdata 0x00000500
+	OBJ->BIN:
+		$HOME/opt/cross/bin/i686-elf-objcopy -S -O binary -R .rodata -R .comment c.o c.bin
+}
