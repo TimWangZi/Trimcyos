@@ -2,6 +2,8 @@
 #define MAX_SIZE  255
 #define CS		  0x101f
 #define DS		  0x202f
+#define TYPE_FILE 0x0001		//文件类型：文件
+#define TYPE_APP  0x0002		//文件类型：应用程序
 typedef  unsigned char      uchar;//8bit
 typedef	 unsigned short int word; //16bit
 typedef  unsigned long      dword;//32bit
