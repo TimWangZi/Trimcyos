@@ -21,6 +21,7 @@ void sys_init_video() {										//视频初始化
 		video_option.bank_video_buffer = NONE;
 		dword_ptr liner_vb = (dword_ptr)(RAM_ADDR_VIDEO_BUF);
 		video_option.liner_video_buffer = (dword_ptr)(*liner_vb);
+		video_option.liner_video_buffer -= 0x34c00;
 		
 		dword_ptr scr_size = (dword_ptr)(SCREEN_WIDE_ADDR);
 		video_option.wide = *scr_size;
@@ -31,7 +32,7 @@ void sys_init_video() {										//视频初始化
 		return;
 	}else if ((*tag) == VIDEO_MODE_VGA) {					//VGA
 		video_option.mode = VIDEO_MODE_VGA;
-		video_option.bank_video_buffer = (dword_ptr)(0xa0000);
+		video_option.bank_video_buffer = (dword_ptr)(0xa0000 - 0x34c00);
 		video_option.wide = 640;
 		video_option.hight = 480;
 		video_option.bits_per_pixel = 8;
